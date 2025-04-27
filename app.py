@@ -1,4 +1,4 @@
-# auth.py - RECTIFIED VERSION
+# auth.py - This is the rectified version with internal error handling
 import streamlit as st
 from streamlit_oauth import OAuth2Component
 # You might need PyYAML for this, add to requirements.txt if you get errors
@@ -22,6 +22,7 @@ def get_oauth_config():
         return None
     except Exception as e:
         st.error(f"Error reading OAuth configuration from secrets.toml: {e}")
+        # This error happens very early, might not be caught by the main try block below
         return None
 
 
@@ -30,6 +31,7 @@ def authenticate_user():
     st.sidebar.title("Authentication") # Add a title to the sidebar section
 
     # --- Core Authentication Logic wrapped in a try-except ---
+    # This try block is intended to catch errors happening during the OAuth flow or component rendering
     try:
         oauth_config = get_oauth_config()
         if not oauth_config:
@@ -41,6 +43,7 @@ def authenticate_user():
 
         # Initialize the OAuth2Component. Use a unique key.
         # The key must be consistent across reruns for the component to work correctly.
+        # An AttributeError during *initialization* of this component is possible
         oauth2 = OAuth2Component(
             oauth_config["client_id"],
             oauth_config["client_secret"],
@@ -48,7 +51,7 @@ def authenticate_user():
             token_endpoint,
             oauth_config["redirect_uri"],
             oauth_config["scope"],
-            key="google_oauth_login_component" # Use a static key string
+            key="google_oauth_login_component_v2" # Changed key slightly to force re-init
         )
 
         # Check if the token exists in Streamlit's session state
@@ -66,6 +69,7 @@ def authenticate_user():
         if st.session_state['token'] is None:
             # User is not authenticated, display the login button
             st.sidebar.write("Please log in:")
+            # An AttributeError could potentially happen inside authorize_button call too
             result = oauth2.authorize_button(
                 name="Continue with Google",
                 icon="https://www.google.com/favicon.ico",
@@ -78,7 +82,8 @@ def authenticate_user():
                 # If the authorization flow completed and returned a result (token)
                 st.session_state['token'] = result
                 # The result dict should contain 'user_info' if 'profile' and 'email' scopes were requested
-                st.session_state['user_info'] = result.get('user_info')
+                # An AttributeError could happen accessing result if it's not a dictionary as expected
+                st.session_state['user_info'] = result.get('user_info') if isinstance(result, dict) else None
                 if st.session_state['user_info']:
                      # Store the unique Google user ID and email
                      st.session_state['user_id'] = st.session_state['user_info'].get('sub')
@@ -91,13 +96,14 @@ def authenticate_user():
         else:
             # User is authenticated, display user information and a logout button
             user_info = st.session_state.get('user_info')
-            if user_info:
+            if user_info and isinstance(user_info, dict): # Add check if user_info is a dict
                 st.sidebar.write(f"Welcome, {user_info.get('name', 'User')}!")
                 st.sidebar.write(f"Email: {user_info.get('email', 'N/A')}")
+            # else: Handle case where user_info is not available/corrupt?
 
             # Add a logout button in the sidebar
             # Use a unique key for the button
-            if st.sidebar.button("Logout", key="google_logout_button"):
+            if st.sidebar.button("Logout", key="google_logout_button_v2"): # Changed key
                 # Clear all authentication-related session state variables
                 st.session_state['token'] = None
                 st.session_state['user_info'] = None
@@ -112,15 +118,17 @@ def authenticate_user():
     except Exception as e:
         # --- This is the crucial part for catching the AttributeError ---
         # Catch any unexpected error that occurs during the authentication logic
+        # This block *should* catch AttributeErrors happening inside the try block
         st.error(f"An unexpected error occurred during authentication process: {e}")
-        st.info("Please check your secrets.toml and Google Cloud OAuth setup.")
+        st.info("This often indicates a problem with secrets.toml, Google Cloud setup, or library compatibility.")
+        st.info("Check the terminal/server logs for the full traceback and specific error message.")
         # Optionally display the full traceback in the app for debugging
         st.exception(e)
         # Print traceback to the terminal where Streamlit is running
         import traceback
-        print("--- Authentication Error Traceback ---")
+        print("\n--- Authentication Error Traceback (from auth.py) ---")
         traceback.print_exc()
-        print("------------------------------------")
+        print("-----------------------------------------------------\n")
 
         # Clear authentication state on error to avoid being stuck
         st.session_state['token'] = None
