@@ -4,3 +4,4 @@ gspread
 pandas
 oauth2client
 plotly
+auth
