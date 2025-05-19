@@ -1,5 +1,4 @@
 fbprophet
-pysimdjson
 streamlit
 streamlit-oauth
 gspread
