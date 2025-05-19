@@ -6,3 +6,5 @@ oauth2client
 plotly
 auth
 sheets
+fbprophet 
+yfinance
