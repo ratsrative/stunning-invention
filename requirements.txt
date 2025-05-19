@@ -1,3 +1,6 @@
+pymeeus
+pysimdjson
+peewee
 streamlit 
 fbprophet 
 yfinance 
