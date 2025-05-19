@@ -2,3 +2,6 @@ fbprophet==0.7.1
 streamlit
 yfinance
 plotly
+matplotlib
+numpy
+pandas
