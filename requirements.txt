@@ -1,7 +1,4 @@
-pymeeus
-pysimdjson
-peewee
-streamlit 
-fbprophet 
-yfinance 
+fbprophet==0.7.1
+streamlit
+yfinance
 plotly
