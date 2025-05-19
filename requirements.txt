@@ -1,3 +1,5 @@
+fbprophet
+pysimdjson
 streamlit
 streamlit-oauth
 gspread
@@ -6,5 +8,4 @@ oauth2client
 plotly
 auth
 sheets
-fbprophet 
 yfinance
