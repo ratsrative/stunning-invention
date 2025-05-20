@@ -3,7 +3,7 @@ import streamlit as st
 from datetime import date
 
 import yfinance as yf
-from Prophet import Prophet
+from Prophet import prophet
 from Prophet.plot import plot_plotly
 from plotly import graph_objs as go
 
