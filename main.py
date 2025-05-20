@@ -6,7 +6,7 @@ import yfinance as yf
 from prophet import Prophet
 from prophet.plot import (plot, plot_components)
 from plotly import graph_objs as go
-
+import pandas as pd
 START = "2015-01-01"
 TODAY = date.today().strftime("%Y-%m-%d")
 
