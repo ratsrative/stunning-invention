@@ -1,4 +1,4 @@
-fbprophet==0.7.1
+Prophet
 streamlit
 yfinance
 plotly
